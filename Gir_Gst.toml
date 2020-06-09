@@ -54,6 +54,9 @@ generate = [
     "Gst.PromiseResult",
     "Gst.ClockEntryType",
     "Gst.PluginAPIFlags",
+    "Gst.ClockFlags",
+    "Gst.ControlBinding",
+    "Gst.ControlSource",
 ]
 
 manual = [
