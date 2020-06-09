@@ -207,6 +207,7 @@ pub use pad::PadBuilder;
 mod parse_context;
 mod proxy_pad;
 mod tag_setter;
+mod control_source;
 pub use bin::GstBinExtManual;
 pub use element::{ElementExtManual, ElementMessageType, NotifyWatchId};
 pub use element::{

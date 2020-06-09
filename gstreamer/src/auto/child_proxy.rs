@@ -42,15 +42,13 @@ pub trait ChildProxyExt: 'static {
 
     fn get_children_count(&self) -> u32;
 
-    //fn get_property(&self, name: &str, value: /*Ignored*/glib::Value);
-
     //fn get_valist(&self, first_property_name: &str, var_args: /*Unknown conversion*//*Unimplemented*/Unsupported);
 
     //fn lookup(&self, name: &str, pspec: /*Ignored*/glib::ParamSpec) -> Option<glib::Object>;
 
     //fn set(&self, first_property_name: &str, : /*Unknown conversion*//*Unimplemented*/Fundamental: VarArgs);
 
-    //fn set_property(&self, name: &str, value: /*Ignored*/&glib::Value);
+    fn set_property(&self, name: &str, value: &glib::Value);
 
     //fn set_valist(&self, first_property_name: &str, var_args: /*Unknown conversion*//*Unimplemented*/Unsupported);
 
@@ -112,10 +110,6 @@ impl<O: IsA<ChildProxy>> ChildProxyExt for O {
         unsafe { gst_sys::gst_child_proxy_get_children_count(self.as_ref().to_glib_none().0) }
     }
 
-    //fn get_property(&self, name: &str, value: /*Ignored*/glib::Value) {
-    //    unsafe { TODO: call gst_sys:gst_child_proxy_get_property() }
-    //}
-
     //fn get_valist(&self, first_property_name: &str, var_args: /*Unknown conversion*//*Unimplemented*/Unsupported) {
     //    unsafe { TODO: call gst_sys:gst_child_proxy_get_valist() }
     //}
@@ -128,9 +122,15 @@ impl<O: IsA<ChildProxy>> ChildProxyExt for O {
     //    unsafe { TODO: call gst_sys:gst_child_proxy_set() }
     //}
 
-    //fn set_property(&self, name: &str, value: /*Ignored*/&glib::Value) {
-    //    unsafe { TODO: call gst_sys:gst_child_proxy_set_property() }
-    //}
+    fn set_property(&self, name: &str, value: &glib::Value) {
+        unsafe {
+            gst_sys::gst_child_proxy_set_property(
+                self.as_ref().to_glib_none().0,
+                name.to_glib_none().0,
+                value.to_glib_none().0,
+            );
+        }
+    }
 
     //fn set_valist(&self, first_property_name: &str, var_args: /*Unknown conversion*//*Unimplemented*/Unsupported) {
     //    unsafe { TODO: call gst_sys:gst_child_proxy_set_valist() }

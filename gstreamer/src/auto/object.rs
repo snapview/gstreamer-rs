@@ -14,6 +14,7 @@ use gst_sys;
 use std::boxed::Box as Box_;
 use std::mem::transmute;
 use ClockTime;
+use ControlBinding;
 
 glib_wrapper! {
     pub struct Object(Object<gst_sys::GstObject, gst_sys::GstObjectClass, ObjectClass>);
@@ -53,15 +54,21 @@ unsafe impl Sync for Object {}
 pub const NONE_OBJECT: Option<&Object> = None;
 
 pub trait GstObjectExt: 'static {
-    //fn add_control_binding(&self, binding: /*Ignored*/&ControlBinding) -> bool;
+    fn add_control_binding<P: IsA<ControlBinding>>(&self, binding: &P) -> bool;
 
     fn default_error(&self, error: &glib::Error, debug: Option<&str>);
 
-    //fn get_control_binding(&self, property_name: &str) -> /*Ignored*/Option<ControlBinding>;
+    fn get_control_binding(&self, property_name: &str) -> Option<ControlBinding>;
 
     fn get_control_rate(&self) -> ClockTime;
 
-    //fn get_g_value_array(&self, property_name: &str, timestamp: ClockTime, interval: ClockTime, values: /*Ignored*/&[&glib::Value]) -> bool;
+    fn get_g_value_array(
+        &self,
+        property_name: &str,
+        timestamp: ClockTime,
+        interval: ClockTime,
+        values: &[&glib::Value],
+    ) -> bool;
 
     fn get_name(&self) -> GString;
 
@@ -69,7 +76,7 @@ pub trait GstObjectExt: 'static {
 
     fn get_path_string(&self) -> GString;
 
-    //fn get_value(&self, property_name: &str, timestamp: ClockTime) -> /*Ignored*/Option<glib::Value>;
+    fn get_value(&self, property_name: &str, timestamp: ClockTime) -> Option<glib::Value>;
 
     //fn get_value_array(&self, property_name: &str, timestamp: ClockTime, interval: ClockTime, n_values: u32, values: /*Unimplemented*/Option<Fundamental: Pointer>) -> bool;
 
@@ -81,7 +88,7 @@ pub trait GstObjectExt: 'static {
 
     fn has_as_parent<P: IsA<Object>>(&self, parent: &P) -> bool;
 
-    //fn remove_control_binding(&self, binding: /*Ignored*/&ControlBinding) -> bool;
+    fn remove_control_binding<P: IsA<ControlBinding>>(&self, binding: &P) -> bool;
 
     fn set_control_binding_disabled(&self, property_name: &str, disabled: bool);
 
@@ -106,9 +113,14 @@ pub trait GstObjectExt: 'static {
 }
 
 impl<O: IsA<Object>> GstObjectExt for O {
-    //fn add_control_binding(&self, binding: /*Ignored*/&ControlBinding) -> bool {
-    //    unsafe { TODO: call gst_sys:gst_object_add_control_binding() }
-    //}
+    fn add_control_binding<P: IsA<ControlBinding>>(&self, binding: &P) -> bool {
+        unsafe {
+            from_glib(gst_sys::gst_object_add_control_binding(
+                self.as_ref().to_glib_none().0,
+                binding.as_ref().to_glib_none().0,
+            ))
+        }
+    }
 
     fn default_error(&self, error: &glib::Error, debug: Option<&str>) {
         unsafe {
@@ -120,9 +132,14 @@ impl<O: IsA<Object>> GstObjectExt for O {
         }
     }
 
-    //fn get_control_binding(&self, property_name: &str) -> /*Ignored*/Option<ControlBinding> {
-    //    unsafe { TODO: call gst_sys:gst_object_get_control_binding() }
-    //}
+    fn get_control_binding(&self, property_name: &str) -> Option<ControlBinding> {
+        unsafe {
+            from_glib_full(gst_sys::gst_object_get_control_binding(
+                self.as_ref().to_glib_none().0,
+                property_name.to_glib_none().0,
+            ))
+        }
+    }
 
     fn get_control_rate(&self) -> ClockTime {
         unsafe {
@@ -132,9 +149,25 @@ impl<O: IsA<Object>> GstObjectExt for O {
         }
     }
 
-    //fn get_g_value_array(&self, property_name: &str, timestamp: ClockTime, interval: ClockTime, values: /*Ignored*/&[&glib::Value]) -> bool {
-    //    unsafe { TODO: call gst_sys:gst_object_get_g_value_array() }
-    //}
+    fn get_g_value_array(
+        &self,
+        property_name: &str,
+        timestamp: ClockTime,
+        interval: ClockTime,
+        values: &[&glib::Value],
+    ) -> bool {
+        let n_values = values.len() as u32;
+        unsafe {
+            from_glib(gst_sys::gst_object_get_g_value_array(
+                self.as_ref().to_glib_none().0,
+                property_name.to_glib_none().0,
+                timestamp.to_glib(),
+                interval.to_glib(),
+                n_values,
+                values.to_glib_none().0,
+            ))
+        }
+    }
 
     fn get_name(&self) -> GString {
         unsafe { from_glib_full(gst_sys::gst_object_get_name(self.as_ref().to_glib_none().0)) }
@@ -156,9 +189,15 @@ impl<O: IsA<Object>> GstObjectExt for O {
         }
     }
 
-    //fn get_value(&self, property_name: &str, timestamp: ClockTime) -> /*Ignored*/Option<glib::Value> {
-    //    unsafe { TODO: call gst_sys:gst_object_get_value() }
-    //}
+    fn get_value(&self, property_name: &str, timestamp: ClockTime) -> Option<glib::Value> {
+        unsafe {
+            from_glib_full(gst_sys::gst_object_get_value(
+                self.as_ref().to_glib_none().0,
+                property_name.to_glib_none().0,
+                timestamp.to_glib(),
+            ))
+        }
+    }
 
     //fn get_value_array(&self, property_name: &str, timestamp: ClockTime, interval: ClockTime, n_values: u32, values: /*Unimplemented*/Option<Fundamental: Pointer>) -> bool {
     //    unsafe { TODO: call gst_sys:gst_object_get_value_array() }
@@ -199,9 +238,14 @@ impl<O: IsA<Object>> GstObjectExt for O {
         }
     }
 
-    //fn remove_control_binding(&self, binding: /*Ignored*/&ControlBinding) -> bool {
-    //    unsafe { TODO: call gst_sys:gst_object_remove_control_binding() }
-    //}
+    fn remove_control_binding<P: IsA<ControlBinding>>(&self, binding: &P) -> bool {
+        unsafe {
+            from_glib(gst_sys::gst_object_remove_control_binding(
+                self.as_ref().to_glib_none().0,
+                binding.as_ref().to_glib_none().0,
+            ))
+        }
+    }
 
     fn set_control_binding_disabled(&self, property_name: &str, disabled: bool) {
         unsafe {
