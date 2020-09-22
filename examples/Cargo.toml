@@ -34,6 +34,7 @@ pangocairo = { git = "https://github.com/gtk-rs/pangocairo", optional = true }
 glutin = { version = "0.21", optional = true }
 winit = { version = "0.19", optional = true }
 once_cell = "1.0"
+image = { version="0.23", optional = true }
 
 [build-dependencies]
 gl_generator = { version = "0.14", optional = true }
@@ -71,6 +72,10 @@ name = "custom_meta"
 
 [[bin]]
 name = "decodebin"
+
+[[bin]]
+name = "debug_ringbuffer"
+required-features = ["v1_14"]
 
 [[bin]]
 name = "encodebin"
@@ -166,3 +171,7 @@ name = "subclass"
 
 [[bin]]
 name = "video_converter"
+
+[[bin]]
+name = "thumbnail"
+required-features = ["image"]
